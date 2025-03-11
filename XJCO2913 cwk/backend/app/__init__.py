@@ -1,14 +1,25 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-from flask_cors import CORS
+from config import Config
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:password@localhost/scooter_db'
-app.config['JWT_SECRET_KEY'] = 'your-secret-key'
+# 创建全局对象
+db = SQLAlchemy()
+jwt = JWTManager()
 
-db = SQLAlchemy(app)
-jwt = JWTManager(app)
-CORS(app)
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
 
-from app import routes, models 
+    # 初始化扩展
+    db.init_app(app)
+    jwt.init_app(app)
+
+    # 注册蓝图
+    from app.routes import auth_bp, admin_bp, booking_bp, help_bp
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(booking_bp)
+    app.register_blueprint(help_bp)
+
+    return app

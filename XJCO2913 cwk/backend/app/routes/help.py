@@ -2,6 +2,9 @@ from flask import jsonify, request
 from app import app, db
 from app.models import HelpCategory, HelpArticle, HelpFeedback
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import Blueprint
+
+help_bp = Blueprint('help', __name__)
 
 @app.route('/api/help/categories', methods=['GET'])
 def get_categories():

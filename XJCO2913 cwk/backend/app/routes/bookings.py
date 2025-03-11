@@ -3,8 +3,11 @@ from app import app, db
 from app.models import Booking, Scooter
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
+from flask import Blueprint
 
-@app.route('/api/bookings', methods=['POST'])
+booking_bp = Blueprint('booking', __name__)
+
+@booking_bp.route('/api/bookings', methods=['POST'])
 @jwt_required()
 def create_booking():
     user_id = get_jwt_identity()
@@ -28,7 +31,7 @@ def create_booking():
     
     return jsonify({'message': '预订成功', 'booking_id': booking.id}), 201
 
-@app.route('/api/bookings/<int:booking_id>/end', methods=['POST'])
+@booking_bp.route('/api/bookings/<int:booking_id>/end', methods=['POST'])
 @jwt_required()
 def end_booking(booking_id):
     booking = Booking.query.get_or_404(booking_id)

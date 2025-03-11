@@ -3,6 +3,9 @@ from app import app, db
 from app.models import User, Booking, Pricing
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, timedelta
+from flask import Blueprint
+
+admin_bp = Blueprint('admin', __name__)
 
 def admin_required(fn):
     @jwt_required()
