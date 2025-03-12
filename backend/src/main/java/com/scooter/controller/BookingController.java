@@ -5,7 +5,6 @@ import com.scooter.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -34,7 +33,6 @@ public class BookingController {
     }
 
     @GetMapping("/scooter/{scooterId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<BookingDTO>> getScooterBookings(@PathVariable Long scooterId) {
         return ResponseEntity.ok(bookingService.findByScooterId(scooterId));
     }
@@ -45,7 +43,6 @@ public class BookingController {
     }
 
     @GetMapping("/active")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<BookingDTO>> getAllActiveBookings() {
         return ResponseEntity.ok(bookingService.findAllActiveBookings());
     }
@@ -84,7 +81,6 @@ public class BookingController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
         bookingService.delete(id);
         return ResponseEntity.ok().build();

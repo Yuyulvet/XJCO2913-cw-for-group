@@ -5,7 +5,6 @@ import com.scooter.entity.Scooter;
 import com.scooter.service.ScooterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -18,7 +17,6 @@ public class ScooterController {
     private final ScooterService scooterService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ScooterDTO> createScooter(@Valid @RequestBody ScooterDTO scooterDTO) {
         return ResponseEntity.ok(scooterService.create(scooterDTO));
     }
@@ -44,13 +42,11 @@ public class ScooterController {
     }
 
     @GetMapping("/low-battery")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<List<ScooterDTO>> getLowBatteryScooters() {
         return ResponseEntity.ok(scooterService.findLowBatteryScooters());
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ScooterDTO> updateScooter(
             @PathVariable Long id,
             @Valid @RequestBody ScooterDTO scooterDTO) {
@@ -58,7 +54,6 @@ public class ScooterController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<ScooterDTO> updateScooterStatus(
             @PathVariable Long id,
             @RequestParam Scooter.ScooterStatus status) {
@@ -74,7 +69,6 @@ public class ScooterController {
     }
 
     @PutMapping("/{id}/battery")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<ScooterDTO> updateBatteryLevel(
             @PathVariable Long id,
             @RequestParam int batteryLevel) {
@@ -82,13 +76,11 @@ public class ScooterController {
     }
 
     @PutMapping("/{id}/maintain")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<ScooterDTO> markAsMaintained(@PathVariable Long id) {
         return ResponseEntity.ok(scooterService.markAsMaintained(id));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteScooter(@PathVariable Long id) {
         scooterService.delete(id);
         return ResponseEntity.ok().build();

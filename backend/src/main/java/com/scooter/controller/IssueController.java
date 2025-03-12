@@ -5,7 +5,6 @@ import com.scooter.entity.Issue;
 import com.scooter.service.IssueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,31 +32,26 @@ public class IssueController {
     }
 
     @GetMapping("/scooter/{scooterId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<List<IssueDTO>> getScooterIssues(@PathVariable Long scooterId) {
         return ResponseEntity.ok(issueService.findByScooterId(scooterId));
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<List<IssueDTO>> getIssuesByStatus(@PathVariable Issue.IssueStatus status) {
         return ResponseEntity.ok(issueService.findByStatus(status));
     }
 
     @GetMapping("/priority/{priority}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<List<IssueDTO>> getIssuesByPriority(@PathVariable Issue.IssuePriority priority) {
         return ResponseEntity.ok(issueService.findByPriority(priority));
     }
 
     @GetMapping("/active")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<List<IssueDTO>> getActiveIssues() {
         return ResponseEntity.ok(issueService.findActiveIssuesOrderByPriority());
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<IssueDTO> updateStatus(
             @PathVariable Long id,
             @RequestParam Issue.IssueStatus status) {
@@ -65,7 +59,6 @@ public class IssueController {
     }
 
     @PutMapping("/{id}/priority")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<IssueDTO> updatePriority(
             @PathVariable Long id,
             @RequestParam Issue.IssuePriority priority) {
@@ -73,7 +66,6 @@ public class IssueController {
     }
 
     @PutMapping("/{id}/feedback")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<IssueDTO> provideFeedback(
             @PathVariable Long id,
             @RequestParam String feedback) {
@@ -81,13 +73,11 @@ public class IssueController {
     }
 
     @GetMapping("/count/{status}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MAINTENANCE')")
     public ResponseEntity<Long> countByStatus(@PathVariable Issue.IssueStatus status) {
         return ResponseEntity.ok(issueService.countByStatus(status));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteIssue(@PathVariable Long id) {
         issueService.delete(id);
         return ResponseEntity.ok().build();

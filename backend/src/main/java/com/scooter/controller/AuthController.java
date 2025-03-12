@@ -1,14 +1,9 @@
 package com.scooter.controller;
 
 import com.scooter.dto.UserDTO;
-import com.scooter.security.JwtTokenProvider;
 import com.scooter.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,29 +17,23 @@ import java.util.Map;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider tokenProvider;
     private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getUsername(),
-                loginRequest.getPassword()
-            )
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
-        
-        UserDTO user = userService.findByUsername(loginRequest.getUsername());
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", jwt);
-        response.put("user", user);
-        
-        return ResponseEntity.ok(response);
+        try {
+            UserDTO user = userService.findByUsername(loginRequest.getUsername());
+            if (!user.getPassword().equals(loginRequest.getPassword())) {
+                return ResponseEntity.badRequest().body("密码错误");
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", user);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("用户不存在");
+        }
     }
 
     @PostMapping("/register")

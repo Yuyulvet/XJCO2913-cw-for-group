@@ -1,11 +1,11 @@
 package com.scooter.service;
 
 import com.scooter.dto.UserDTO;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import com.scooter.entity.User;
 
 import java.util.List;
 
-public interface UserService extends UserDetailsService {
+public interface UserService {
     UserDTO register(UserDTO userDTO);
     
     UserDTO findById(Long id);

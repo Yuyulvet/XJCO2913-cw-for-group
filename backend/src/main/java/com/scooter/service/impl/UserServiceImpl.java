@@ -5,14 +5,9 @@ import com.scooter.entity.User;
 import com.scooter.repository.UserRepository;
 import com.scooter.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +15,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -35,7 +29,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setPassword(userDTO.getPassword());
         user.setRole(User.UserRole.USER);
 
         return UserDTO.fromEntity(userRepository.save(user));
@@ -81,7 +75,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+            user.setPassword(userDTO.getPassword());
         }
 
         return UserDTO.fromEntity(userRepository.save(user));
@@ -109,17 +103,5 @@ public class UserServiceImpl implements UserService {
     @Override
     public long countCustomers() {
         return userRepository.countCustomers();
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("用户不存在"));
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-        );
     }
 } 

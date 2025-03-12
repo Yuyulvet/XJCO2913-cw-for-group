@@ -27,10 +27,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                @Param("startDate") LocalDateTime startDate,
                                @Param("endDate") LocalDateTime endDate);
     
-    @Query("SELECT SUM(TIMESTAMPDIFF(MINUTE, b.startTime, b.endTime)) " +
-           "FROM Booking b WHERE b.user.id = :userId AND " +
-           "b.startTime >= :startDate AND b.endTime <= :endDate AND " +
-           "b.status = 'COMPLETED'")
+    @Query(value = "SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)), 0) " +
+           "FROM booking b WHERE b.user_id = :userId AND " +
+           "b.start_time >= :startDate AND b.end_time <= :endDate AND " +
+           "b.status = 'COMPLETED'", nativeQuery = true)
     Long calculateUserUsageMinutes(@Param("userId") Long userId,
                                  @Param("startDate") LocalDateTime startDate,
                                  @Param("endDate") LocalDateTime endDate);
