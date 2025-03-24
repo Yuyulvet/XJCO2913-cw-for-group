@@ -22,31 +22,25 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            UserDTO user = userService.findByUsername(loginRequest.getUsername());
-            if (!user.getPassword().equals(loginRequest.getPassword())) {
-                return ResponseEntity.badRequest().body("密码错误");
-            }
-            
+            UserDTO user = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
             Map<String, Object> response = new HashMap<>();
             response.put("user", user);
-            
+            // 这里应该添加 JWT token，暂时使用模拟的 token
+            response.put("token", "mock-jwt-token");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("用户不存在");
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody UserDTO userDTO) {
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body("用户名已存在");
+        try {
+            UserDTO registeredUser = userService.register(userDTO);
+            return ResponseEntity.ok(registeredUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        if (userService.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().body("邮箱已存在");
-        }
-
-        UserDTO registeredUser = userService.register(userDTO);
-        return ResponseEntity.ok(registeredUser);
     }
 
     public static class LoginRequest {

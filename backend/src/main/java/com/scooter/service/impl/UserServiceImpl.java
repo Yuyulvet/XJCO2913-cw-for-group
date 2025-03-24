@@ -4,7 +4,8 @@ import com.scooter.dto.UserDTO;
 import com.scooter.entity.User;
 import com.scooter.repository.UserRepository;
 import com.scooter.service.UserService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,27 +13,62 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
+
+    private static final String MANAGER_INVITE_CODE = "XJCO2913";
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public UserDTO register(UserDTO userDTO) {
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new RuntimeException("用户名已存在");
+        // 检查用户名是否已存在
+        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
         }
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new RuntimeException("邮箱已存在");
+
+        // 检查邮箱是否已存在
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
         }
 
         User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
-        user.setRole(User.UserRole.USER);
+        
+        // 加密密码
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
-        return UserDTO.fromEntity(userRepository.save(user));
+        // 根据邀请码设置角色
+        if (userDTO.getInviteCode() != null) {
+            if (MANAGER_INVITE_CODE.equals(userDTO.getInviteCode())) {
+                user.setRole(User.UserRole.MANAGER);
+            } else {
+                throw new RuntimeException("Invalid invitation code");
+            }
+        } else {
+            user.setRole(User.UserRole.USER);
+        }
+
+        user = userRepository.save(user);
+        return UserDTO.fromEntity(user);
+    }
+
+    @Override
+    @Transactional
+    public UserDTO login(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return UserDTO.fromEntity(user);
     }
 
     @Override
@@ -75,7 +111,7 @@ public class UserServiceImpl implements UserService {
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            user.setPassword(userDTO.getPassword());
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
 
         return UserDTO.fromEntity(userRepository.save(user));
@@ -103,5 +139,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public long countCustomers() {
         return userRepository.countCustomers();
+    }
+
+    public boolean validatePassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 } 

@@ -27,6 +27,9 @@ public class UserDTO {
     @NotBlank(message = "密码不能为空")
     @Size(min = 6, max = 100, message = "密码长度必须在6-100个字符之间")
     private String password;
+
+    // 邀请码字段，用于管理员注册
+    private String inviteCode;
     
     public static UserDTO fromEntity(User user) {
         UserDTO dto = new UserDTO();

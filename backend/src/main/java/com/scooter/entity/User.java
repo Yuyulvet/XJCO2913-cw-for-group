@@ -30,7 +30,8 @@ public class User {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    private UserRole role = UserRole.USER;
+    @Column(nullable = false)
+    private UserRole role;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -42,6 +43,7 @@ public class User {
     private Set<Issue> issues = new HashSet<>();
 
     public enum UserRole {
-        USER, MANAGER
+        USER,
+        MANAGER
     }
 } 

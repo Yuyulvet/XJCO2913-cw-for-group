@@ -23,4 +23,6 @@ public interface UserService {
     boolean existsByEmail(String email);
     
     long countCustomers();
+    
+    UserDTO login(String username, String password);
 } 
