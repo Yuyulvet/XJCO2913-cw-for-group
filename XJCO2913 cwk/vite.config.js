@@ -13,11 +13,33 @@ export default defineConfig({
     }
   },
   server: {
+    port: 5173,
+    host: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
+  },
+  build: {
+    // 生产环境构建配置
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'element-plus': ['element-plus'],
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'chart': ['chart.js']
+        }
+      }
+    },
+    // 启用 gzip 压缩
+    brotliSize: true,
+    // 代码分割配置
+    chunkSizeWarningLimit: 1500,
+    // 资源内联限制
+    assetsInlineLimit: 4096
   }
 }) 

@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import MainLayout from '../layouts/MainLayout.vue'
 import Login from '../views/Login.vue'
+import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import ScooterMap from '../views/ScooterMap.vue'
 import BookingHistory from '../views/BookingHistory.vue'
@@ -10,21 +12,33 @@ import AdminDashboard from '../views/admin/Dashboard.vue'
 
 const routes = [
   {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/Home.vue')
+  },
+  {
     path: '/login',
     name: 'Login',
-    component: Login,
-    meta: { requiresAuth: false }
+    component: () => import('@/views/Login.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/Register.vue'),
+    meta: { requiresGuest: true }
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/Dashboard.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/',
     component: MainLayout,
     meta: { requiresAuth: true },
     children: [
-      {
-        path: 'dashboard',
-        name: 'Dashboard',
-        component: Dashboard
-      },
       {
         path: 'map',
         name: 'Map',
@@ -56,17 +70,16 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  const userRole = localStorage.getItem('userRole')
+  const userStore = useUserStore()
   
-  if (to.meta.requiresAuth && !token) {
+  if (to.meta.requiresAuth && !userStore.isAuthenticated) {
     next('/login')
-  } else if (to.meta.requiresManager && userRole !== 'manager') {
+  } else if (to.meta.requiresGuest && userStore.isAuthenticated) {
     next('/dashboard')
   } else {
     next()

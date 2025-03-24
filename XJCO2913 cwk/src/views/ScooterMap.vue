@@ -171,15 +171,8 @@ const isScooterAvailable = (scooter) => {
 
 // 生命周期钩子
 onMounted(() => {
-  // 加载高德地图脚本
-  const script = document.createElement('script')
-  script.src = `https://webapi.amap.com/maps?v=2.0&key=db11f162ff2bfb4ceb25595fbed1fc9c`
-  script.async = true
-  script.onload = () => {
-    initMap()
-    fetchScooters()
-  }
-  document.head.appendChild(script)
+  initMap()
+  fetchScooters()
 })
 
 onUnmounted(() => {

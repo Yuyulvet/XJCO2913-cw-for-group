@@ -3,61 +3,44 @@ import api from '@/api'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    id: null,
-    username: '',
-    email: '',
-    role: '',
-    token: localStorage.getItem('token') || '',
-    isAuthenticated: false
+    token: localStorage.getItem('token') || null,
+    username: localStorage.getItem('username') || null,
+    role: localStorage.getItem('role') || null
   }),
 
   getters: {
-    isManager: (state) => state.role === 'MANAGER',
-    getUserId: (state) => state.id
+    isAuthenticated: (state) => !!state.token
   },
 
   actions: {
     async login(username, password) {
       try {
         const response = await api.post('/auth/login', { username, password })
-        this.setUserInfo(response.user)
-        this.setToken(response.token)
+        const { token, role } = response.data
+        
+        this.token = token
+        this.username = username
+        this.role = role
+        
+        localStorage.setItem('token', token)
+        localStorage.setItem('username', username)
+        localStorage.setItem('role', role)
+        
         return true
       } catch (error) {
-        console.error('登录失败:', error)
+        console.error('Login failed:', error)
         return false
       }
     },
 
     async logout() {
-      this.clearUserInfo()
-      this.clearToken()
-    },
-
-    setUserInfo(user) {
-      this.id = user.id
-      this.username = user.username
-      this.email = user.email
-      this.role = user.role
-      this.isAuthenticated = true
-    },
-
-    setToken(token) {
-      this.token = token
-      localStorage.setItem('token', token)
-    },
-
-    clearUserInfo() {
-      this.id = null
-      this.username = ''
-      this.email = ''
-      this.role = ''
-      this.isAuthenticated = false
-    },
-
-    clearToken() {
-      this.token = ''
+      this.token = null
+      this.username = null
+      this.role = null
+      
       localStorage.removeItem('token')
+      localStorage.removeItem('username')
+      localStorage.removeItem('role')
     }
   }
 }) 
